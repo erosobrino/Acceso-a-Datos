@@ -133,6 +133,11 @@ public class Principal7 {
 			}
 			break;
 		}
+		
 	}
+
+		public void nad() {
+			System.out.println("ñsafmvadb");
+		}
 
 }
