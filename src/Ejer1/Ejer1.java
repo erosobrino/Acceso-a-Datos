@@ -32,7 +32,7 @@ public class Ejer1 {
 			for (int j = 0; j < atributos.getLength(); j++) {
 				System.out.println(atributos.item(j).getNodeName());
 			}
-		}
+		}//no funciona
 
 	}
 
