@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<filmoteca><!-- Las películas -->
+    <pelicula año="1984" genero="Ciencia Ficción" idioma="es">
+        <titulo>Dune</titulo>
+        <director>
+            <nombre>David</nombre>
+            <apellido>Lynch</apellido>
+        </director>
+    </pelicula>
+    <pelicula año="2001" genero="Fantasia" idioma="es">
+        <titulo>El Señor de los Anillos</titulo>
+        <director>
+            <nombre>Peter</nombre>
+            <apellido>Jackson</apellido>
+        </director>
+    </pelicula>
+    <pelicula año="1999" genero="Ciencia Ficción" idioma="en">
+        <titulo>Matrix</titulo>
+        <director>
+            <nombre>Andy</nombre>
+            <apellido>Wachowski</apellido>
+        </director>
+        <director>
+            <nombre>Larry</nombre>
+            <apellido>Wachowski</apellido>
+        </director>
+    </pelicula>
+    <pelicula año="1992" genero="Ciencia Ficción" idioma="en">
+        <titulo>Blade Runner</titulo>
+        <director>
+            <nombre>Ridley</nombre>
+            <apellido>Scott</apellido>
+        </director>
+    </pelicula>
+    <pelicula año="1996" genero="Thriller" idioma="en">
+        <titulo>Fargo</titulo>
+        <director>
+            <nombre>Joel</nombre>
+            <apellido>Coen</apellido>
+        </director>
+        <director>
+            <nombre>Ethan</nombre>
+            <apellido>Coen</apellido>
+        </director>
+    </pelicula>
+    <pelicula año="1979" genero="Ciencia Ficción" idioma="en">
+        <titulo>Alien</titulo>
+        <director>
+            <nombre>Ridley</nombre>
+            <apellido>Scott</apellido>
+        </director>
+    </pelicula>
+</filmoteca>
