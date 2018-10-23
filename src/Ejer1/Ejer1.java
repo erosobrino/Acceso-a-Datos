@@ -4,6 +4,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.util.HashMap;
 
+import javax.print.Doc;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
@@ -31,36 +32,101 @@ public class Ejer1 {
 //		ejer.arbolRecursivo(doc, doc.getChildNodes(), -1);//4
 //		ejer.peliculasNDirectores(doc, 1);//5
 //		System.out.println("Hay "+ejer.cantidadGenerosDistintos(doc)+" generos distintos");//6
-		
+
 //		ejer.añadeEliminaAtributoaPelicula(doc, "Dune", "Edad", true);//7
 //		muestraTituloAtributos(doc);
 //		ejer.añadeEliminaAtributoaPelicula(doc, "Dune", "Edad", false);
 //		muestraTituloAtributos(doc);
-		
+
 //		doc = ejer.añadeDom(doc, "Depredador", "1987", "John", "Tiernan", "Accion", "en");//8
 //		muestraTituloAtributos(doc);
-//		try {
-//			ejer.guardarDom(doc, "D:\\Ciclo\\Acceso a datos\\Tema2\\src\\salida.xml");
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		}
-		
+//		guarda(ejer, doc,"salida");
+
 //		ejer.modificarDom(doc, "nombre", "Larry", "Lana");//9
-//		try {
-//			ejer.guardarDom(doc, "D:\\Ciclo\\Acceso a datos\\Tema2\\src\\salida.xml");
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		}
-		
-		ejer.añadirDirector();
+//		guarda(ejer, doc,"salida");
+
+//		doc=ejer.añadirDirector(doc,"Dune", "Alfredo","Landa");//10
+//		guarda(ejer, doc,"salida");
+
+//		doc = ejer.borraElemntoPadre(doc, "Dune", "titulo", "pelicula");// 11
+//		guarda(ejer, doc,"salida");
+
+		Document compañia=null;
+		guarda(ejer, compañia, "compañia");
+		compañia=ejer.inicializaCompañia(compañia);
+		compañia=ejer.añadeEmpleado(compañia, "1", "ero", "sobrino", "ero", "1");
+		guarda(ejer, compañia, "compañia");
 	}
 	
-	public void añadirDirector() {
-		
-	}
+	public Document inicializaCompañia(Document doc) {
+		Element compañia=doc.createElement("compañia");
+		return doc;
+	}//Falla inicializa y añade
 	
+	public Document añadeEmpleado(Document doc,String id, String nombre, String apellidos, String apodo, String salario) {
+		Element nodoEmpleado=doc.createElement("empleado");
+		nodoEmpleado.setAttribute("id", id);
+		nodoEmpleado.appendChild(doc.createTextNode("\n"));
+		Element nodoNombre=doc.createElement("nombre");
+		Text textNombre=doc.createTextNode(nombre);
+		nodoNombre.appendChild(textNombre);
+		Element nodoApellidos=doc.createElement("apellidos");
+		Text textApellidos=doc.createTextNode(apellidos);
+		nodoApellidos.appendChild(textApellidos);
+		Element nodoApodo=doc.createElement("apodo");
+		Text textApodo=doc.createTextNode(apodo);
+		nodoApodo.appendChild(textApodo);
+		Element nodoSalario=doc.createElement("salario");
+		Text textSalario=doc.createTextNode(salario);
+		nodoSalario.appendChild(textSalario);
+		nodoEmpleado.appendChild(nodoNombre);
+		nodoEmpleado.appendChild(doc.createTextNode("\n"));
+		nodoEmpleado.appendChild(nodoApellidos);
+		nodoEmpleado.appendChild(doc.createTextNode("\n"));
+		nodoEmpleado.appendChild(nodoApodo);
+		nodoEmpleado.appendChild(doc.createTextNode("\n"));
+		nodoEmpleado.appendChild(nodoSalario);
+		nodoEmpleado.appendChild(doc.createTextNode("\n"));
+		
+		doc.getFirstChild().appendChild(nodoEmpleado);
+		return doc;
+	}
+
+	public Document borraElemntoPadre(Document doc, String nombre, String tipoNombre, String tipoPadre) {
+		NodeList datos = doc.getElementsByTagName(tipoNombre);
+		for (int i = 0; i < datos.getLength(); i++) {
+			if (datos.item(i).getFirstChild().getNodeValue().equals(nombre)) {
+				datos.item(i).getParentNode().getParentNode().removeChild(datos.item(i).getParentNode());
+			}
+		}
+		return doc;
+	}
+
+	public Document añadirDirector(Document doc, String titulo, String nombre, String apellido) {
+		Element nodoDirector = doc.createElement("director");
+		nodoDirector.appendChild(doc.createTextNode("\n"));
+		Element nodoNombre = doc.createElement("nombre");
+		Text textNodoNombre = doc.createTextNode(nombre);
+		nodoNombre.appendChild(textNodoNombre);
+		Element nodoApellido = doc.createElement("apellido");
+		Text textNodoApellido = doc.createTextNode(apellido);
+		nodoApellido.appendChild(textNodoApellido);
+		nodoDirector.appendChild(nodoNombre);
+		nodoDirector.appendChild(doc.createTextNode("\n"));
+		nodoDirector.appendChild(nodoApellido);
+		nodoDirector.appendChild(doc.createTextNode("\n"));
+		NodeList peliculas = doc.getElementsByTagName("pelicula");
+		for (int i = 0; i < peliculas.getLength(); i++) {
+			if (peliculas.item(i).getChildNodes().item(1).getFirstChild().getNodeValue().equals(titulo)) {
+				peliculas.item(i).appendChild(nodoDirector);
+			}
+		}
+
+		return doc;
+	}
+
 	public void modificarDom(Document doc, String nodoModificar, String textoAntiguo, String textoNuevo) {
-		NodeList nombres=doc.getElementsByTagName(nodoModificar);
+		NodeList nombres = doc.getElementsByTagName(nodoModificar);
 		for (int i = 0; i < nombres.getLength(); i++) {
 			if (nombres.item(i).getFirstChild().getNodeValue().equals(textoAntiguo)) {
 				nombres.item(i).getFirstChild().setNodeValue(textoNuevo);
@@ -175,7 +241,6 @@ public class Ejer1 {
 			NamedNodeMap atributos = peliculas.item(i).getAttributes();
 			for (int j = 0; j < atributos.getLength(); j++) {
 				if (atributos.item(j).getNodeName().equals("genero")) {
-//					System.out.println(atributos.item(j).getNodeValue());
 					if (generos.containsKey(atributos.item(j).getNodeValue())) {
 						generos.put(atributos.item(j).getNodeValue(),
 								generos.get(atributos.item(j).getNodeValue()) + 1);
@@ -190,7 +255,8 @@ public class Ejer1 {
 		}
 		return generos.size();
 	}
-	//Corregido
+
+	// Corregido
 	public void peliculasNDirectores(Document doc, int n) {
 		int cont = 0;
 		String titulo = "";
@@ -212,7 +278,8 @@ public class Ejer1 {
 			cont = 0;
 		}
 	}
-	//Corregido
+
+	// Corregido
 	public void arbolRecursivo(NodeList padre, int pro) {
 		pro++;
 		for (int i = 0; i < padre.getLength(); i++) {
@@ -221,18 +288,20 @@ public class Ejer1 {
 			}
 			System.out.println(padre.item(i).getNodeType() + " " + padre.item(i).getNodeName());
 			if (padre.item(i).hasChildNodes()) {
-				arbolRecursivo( padre.item(i).getChildNodes(), pro);
+				arbolRecursivo(padre.item(i).getChildNodes(), pro);
 			}
 		}
 	}
-	//Corregido
+
+	// Corregido
 	public void getDato(Document doc, String tag) {
 		NodeList titulos = doc.getElementsByTagName(tag);
 		for (int i = 0; i < titulos.getLength(); i++) {
 			System.out.println(tag + ": " + titulos.item(i).getFirstChild().getNodeValue());
 		}
 	}
-	//Corregido
+
+	// Corregido
 	public void getTituloNombreApellidoGenero(Document doc) {
 		NodeList titulos = doc.getElementsByTagName("titulo");
 		for (int i = 0; i < titulos.getLength(); i++) {
@@ -262,7 +331,8 @@ public class Ejer1 {
 			System.out.println();
 		}
 	}
-	//Corregido
+
+	// Corregido
 	public Document creaArbol(String ruta) {
 		Document doc = null;
 		try {
@@ -276,4 +346,11 @@ public class Ejer1 {
 		return doc;
 	}
 
+	public static void guarda(Ejer1 ejer, Document doc, String nombre) {
+		try {
+			ejer.guardarDom(doc, "D:\\Ciclo\\Acceso a datos\\Tema2\\src\\" + nombre + ".xml");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 }
