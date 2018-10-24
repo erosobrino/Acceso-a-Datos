@@ -7,6 +7,7 @@ import java.util.HashMap;
 import javax.print.Doc;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
@@ -42,42 +43,69 @@ public class Ejer1 {
 //		muestraTituloAtributos(doc);
 //		guarda(ejer, doc,"salida");
 
-//		ejer.modificarDom(doc, "nombre", "Larry", "Lana");//9
-//		guarda(ejer, doc,"salida");
+//		ejer.modificarDom(doc, "nombre", "Larry", "Lana", "Wachowski");// 9
+//		guarda(ejer, doc, "salida");
 
 //		doc=ejer.añadirDirector(doc,"Dune", "Alfredo","Landa");//10
 //		guarda(ejer, doc,"salida");
 
-//		doc = ejer.borraElemntoPadre(doc, "Dune", "titulo", "pelicula");// 11
+//		doc = ejer.borraElemntoPadre(doc, "Dune", "titulo");// 11
 //		guarda(ejer, doc,"salida");
 
-		Document compañia=null;
-		guarda(ejer, compañia, "compañia");
-		compañia=ejer.inicializaCompañia(compañia);
-		compañia=ejer.añadeEmpleado(compañia, "1", "ero", "sobrino", "ero", "1");
-		guarda(ejer, compañia, "compañia");
+//		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();//12 Crea archivo con compañia
+//		DocumentBuilder builder = null;
+//		try {
+//			builder = factory.newDocumentBuilder();
+//		} catch (ParserConfigurationException e) {
+//		}
+//		Document compañia = builder.newDocument();
+//		compañia = ejer.inicializaCompañia(compañia);
+		
+		Document compañia=ejer.creaArbol("D:\\Ciclo\\Acceso a datos\\Tema2\\src\\compania.xml");
+//		Document auxCompañia = ejer.añadeEmpleado(compañia, "1", "ero", "sobrino", "ero", "1");
+		Document auxCompañia = ejer.añadeEmpleado(compañia, "2", "miguel", "valiente", "endes", "500");
+		if (auxCompañia!=null) {
+			compañia=auxCompañia;
+		}else{
+			System.out.println("El id ya existe");
+		}
+		guarda(ejer, compañia, "compania");
 	}
-	
+
 	public Document inicializaCompañia(Document doc) {
-		Element compañia=doc.createElement("compañia");
+		Element compañia = doc.createElement("compañia");
+		compañia.appendChild(doc.createTextNode("\n"));
+		doc.appendChild(compañia);
 		return doc;
-	}//Falla inicializa y añade
-	
-	public Document añadeEmpleado(Document doc,String id, String nombre, String apellidos, String apodo, String salario) {
-		Element nodoEmpleado=doc.createElement("empleado");
+	}// Falla inicializa y añade
+
+	public Document añadeEmpleado(Document doc, String id, String nombre, String apellidos, String apodo,
+			String salario) {
+		NodeList empleados=doc.getElementsByTagName("empleado");
+		for (int i = 0; i < empleados.getLength(); i++) {
+			NamedNodeMap atributos=empleados.item(i).getAttributes();
+			for (int j = 0; j < atributos.getLength(); j++) {
+				if (atributos.item(j).getNodeName().equals("id")) {
+					if (atributos.item(j).getFirstChild().getNodeValue().equals(id)) {
+						return  null;
+					}
+				}
+			}
+		}
+		Element nodoEmpleado = doc.createElement("empleado");
 		nodoEmpleado.setAttribute("id", id);
 		nodoEmpleado.appendChild(doc.createTextNode("\n"));
-		Element nodoNombre=doc.createElement("nombre");
-		Text textNombre=doc.createTextNode(nombre);
+		Element nodoNombre = doc.createElement("nombre");
+		Text textNombre = doc.createTextNode(nombre);
 		nodoNombre.appendChild(textNombre);
-		Element nodoApellidos=doc.createElement("apellidos");
-		Text textApellidos=doc.createTextNode(apellidos);
+		Element nodoApellidos = doc.createElement("apellidos");
+		Text textApellidos = doc.createTextNode(apellidos);
 		nodoApellidos.appendChild(textApellidos);
-		Element nodoApodo=doc.createElement("apodo");
-		Text textApodo=doc.createTextNode(apodo);
+		Element nodoApodo = doc.createElement("apodo");
+		Text textApodo = doc.createTextNode(apodo);
 		nodoApodo.appendChild(textApodo);
-		Element nodoSalario=doc.createElement("salario");
-		Text textSalario=doc.createTextNode(salario);
+		Element nodoSalario = doc.createElement("salario");
+		Text textSalario = doc.createTextNode(salario);
 		nodoSalario.appendChild(textSalario);
 		nodoEmpleado.appendChild(nodoNombre);
 		nodoEmpleado.appendChild(doc.createTextNode("\n"));
@@ -87,12 +115,12 @@ public class Ejer1 {
 		nodoEmpleado.appendChild(doc.createTextNode("\n"));
 		nodoEmpleado.appendChild(nodoSalario);
 		nodoEmpleado.appendChild(doc.createTextNode("\n"));
-		
+
 		doc.getFirstChild().appendChild(nodoEmpleado);
 		return doc;
 	}
 
-	public Document borraElemntoPadre(Document doc, String nombre, String tipoNombre, String tipoPadre) {
+	public Document borraElemntoPadre(Document doc, String nombre, String tipoNombre) {
 		NodeList datos = doc.getElementsByTagName(tipoNombre);
 		for (int i = 0; i < datos.getLength(); i++) {
 			if (datos.item(i).getFirstChild().getNodeValue().equals(nombre)) {
@@ -125,11 +153,29 @@ public class Ejer1 {
 		return doc;
 	}
 
-	public void modificarDom(Document doc, String nodoModificar, String textoAntiguo, String textoNuevo) {
+	public void modificarDom(Document doc, String nodoModificar, String textoAntiguo, String textoNuevo,
+			String apellido) {
 		NodeList nombres = doc.getElementsByTagName(nodoModificar);
 		for (int i = 0; i < nombres.getLength(); i++) {
-			if (nombres.item(i).getFirstChild().getNodeValue().equals(textoAntiguo)) {
-				nombres.item(i).getFirstChild().setNodeValue(textoNuevo);
+			if (nodoModificar.equals("nombre")) {
+//				if (nombres.item(i).getFirstChild().getNodeValue().equals(textoAntiguo) && nombres.item(i)
+//						.getParentNode().getChildNodes().item(3).getFirstChild().getNodeValue().equals(apellido)) {
+//					nombres.item(i).getFirstChild().setNodeValue(textoNuevo);
+//				}
+				if (nombres.item(i).getFirstChild().getNodeValue().equals(textoAntiguo)) {
+					NodeList hermanos=nombres.item(i).getParentNode().getChildNodes();
+					for (int j = 0; j < hermanos.getLength(); j++) {
+						if (hermanos.item(j).getNodeName().equals("apellido")) {
+							if (hermanos.item(j).getFirstChild().getNodeValue().equals(apellido)) {
+								nombres.item(i).getFirstChild().setNodeValue(textoNuevo);
+							}
+						}
+					}
+				}
+			} else {
+				if (nombres.item(i).getFirstChild().getNodeValue().equals(textoAntiguo)) {
+					nombres.item(i).getFirstChild().setNodeValue(textoNuevo);
+				}
 			}
 		}
 	}
