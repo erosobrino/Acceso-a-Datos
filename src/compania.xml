@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<compañia>
+    <empleado id="2">
+        <nombre>miguel</nombre>
+        <apellidos>valiente</apellidos>
+        <apodo>endes</apodo>
+        <salario>500</salario>
+    </empleado>
+    <empleado id="1">
+        <nombre>ero</nombre>
+        <apellidos>sobrino</apellidos>
+        <apodo>ero</apodo>
+        <salario>1</salario>
+    </empleado>
+</compañia>

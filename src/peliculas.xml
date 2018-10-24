@@ -21,6 +21,10 @@
             <apellido>Wachowski</apellido>
         </director>
         <director>
+			<nombre>Larry</nombre>
+			<apellido>Valiente</apellido>
+		</director>
+		<director>
             <nombre>Larry</nombre>
             <apellido>Wachowski</apellido>
         </director>
