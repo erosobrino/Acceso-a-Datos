@@ -36,6 +36,7 @@ public class PrincipalSax {
 
 class ParserSAX4 extends DefaultHandler {
 	boolean existe = false;
+	
 	ArrayList<String> generos = new ArrayList<>();
 
 	@Override
