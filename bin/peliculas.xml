@@ -20,12 +20,12 @@
             <nombre>Andy</nombre>
             <apellido>Wachowski</apellido>
         </director>
-        <director>
+		<director>
             <nombre>Larry</nombre>
             <apellido>Wachowski</apellido>
         </director>
     </pelicula>
-    <pelicula año="1992" genero="Ciencia Ficción" idioma="en">
+    <pelicula año="1992" genero="Ciencia Ficción" idioma="en" edns="">
         <titulo>Blade Runner</titulo>
         <director>
             <nombre>Ridley</nombre>

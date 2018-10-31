@@ -49,8 +49,8 @@ public class Ejer1 {
 //		doc=ejer.añadirDirector(doc,"Dune", "Alfredo","Landa");//10
 //		guarda(ejer, doc,"salida");
 
-//		doc = ejer.borraElemntoPadre(doc, "Dune", "titulo");// 11
-//		guarda(ejer, doc,"salida");
+		doc = ejer.borraElemntoPadre(doc, "\n        ", "pelicula");// 11
+		guarda(ejer, doc, "salida");
 
 //		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();//12 Crea archivo con compañia
 //		DocumentBuilder builder = null;
@@ -60,34 +60,35 @@ public class Ejer1 {
 //		}
 //		Document compañia = builder.newDocument();
 //		compañia = ejer.inicializaCompañia(compañia);
-		
-		Document compañia=ejer.creaArbol("D:\\Ciclo\\Acceso a datos\\Tema2\\src\\compania.xml");
-//		Document auxCompañia = ejer.añadeEmpleado(compañia, "1", "ero", "sobrino", "ero", "1");
-		Document auxCompañia = ejer.añadeEmpleado(compañia, "2", "miguel", "valiente", "endes", "500");
-		if (auxCompañia!=null) {
-			compañia=auxCompañia;
-		}else{
-			System.out.println("El id ya existe");
-		}
-		guarda(ejer, compañia, "compania");
-	}
 
+//		Document compañia=ejer.creaArbol("D:\\Ciclo\\Acceso a datos\\Tema2\\src\\compania.xml");
+////		Document auxCompañia = ejer.añadeEmpleado(compañia, "1", "ero", "sobrino", "ero", "1");
+//		Document auxCompañia = ejer.añadeEmpleado(compañia, "2", "miguel", "valiente", "endes", "500");
+//		if (auxCompañia!=null) {
+//			compañia=auxCompañia;
+//		}else{
+//			System.out.println("El id ya existe");
+//		}
+//		guarda(ejer, compañia, "compania");
+	}
+	// Corregido
 	public Document inicializaCompañia(Document doc) {
 		Element compañia = doc.createElement("compañia");
 		compañia.appendChild(doc.createTextNode("\n"));
 		doc.appendChild(compañia);
 		return doc;
-	}// Falla inicializa y añade
+	}
 
-	public Document añadeEmpleado(Document doc, String id, String nombre, String apellidos, String apodo,
+	// Corregido
+	public boolean añadeEmpleado(Document doc, String id, String nombre, String apellidos, String apodo,
 			String salario) {
-		NodeList empleados=doc.getElementsByTagName("empleado");
+		NodeList empleados = doc.getElementsByTagName("empleado");
 		for (int i = 0; i < empleados.getLength(); i++) {
-			NamedNodeMap atributos=empleados.item(i).getAttributes();
+			NamedNodeMap atributos = empleados.item(i).getAttributes();
 			for (int j = 0; j < atributos.getLength(); j++) {
 				if (atributos.item(j).getNodeName().equals("id")) {
 					if (atributos.item(j).getFirstChild().getNodeValue().equals(id)) {
-						return  null;
+						return false;
 					}
 				}
 			}
@@ -117,35 +118,38 @@ public class Ejer1 {
 		nodoEmpleado.appendChild(doc.createTextNode("\n"));
 
 		doc.getFirstChild().appendChild(nodoEmpleado);
-		return doc;
+		return true;
 	}
 
-	public Document borraElemntoPadre(Document doc, String nombre, String tipoNombre) {
-		NodeList datos = doc.getElementsByTagName(tipoNombre);
+	// Corregido
+	public Document borraElemntoPadre(Document doc, String valorElementoHijo, String tipoElementoHijo) {
+		NodeList datos = doc.getElementsByTagName(tipoElementoHijo);
 		for (int i = 0; i < datos.getLength(); i++) {
-			if (datos.item(i).getFirstChild().getNodeValue().equals(nombre)) {
+			if (datos.item(i).getFirstChild().getNodeValue().equals(valorElementoHijo)) {
 				datos.item(i).getParentNode().getParentNode().removeChild(datos.item(i).getParentNode());
 			}
 		}
 		return doc;
 	}
 
+	// Corregido
 	public Document añadirDirector(Document doc, String titulo, String nombre, String apellido) {
-		Element nodoDirector = doc.createElement("director");
-		nodoDirector.appendChild(doc.createTextNode("\n"));
-		Element nodoNombre = doc.createElement("nombre");
-		Text textNodoNombre = doc.createTextNode(nombre);
-		nodoNombre.appendChild(textNodoNombre);
-		Element nodoApellido = doc.createElement("apellido");
-		Text textNodoApellido = doc.createTextNode(apellido);
-		nodoApellido.appendChild(textNodoApellido);
-		nodoDirector.appendChild(nodoNombre);
-		nodoDirector.appendChild(doc.createTextNode("\n"));
-		nodoDirector.appendChild(nodoApellido);
-		nodoDirector.appendChild(doc.createTextNode("\n"));
+
 		NodeList peliculas = doc.getElementsByTagName("pelicula");
 		for (int i = 0; i < peliculas.getLength(); i++) {
 			if (peliculas.item(i).getChildNodes().item(1).getFirstChild().getNodeValue().equals(titulo)) {
+				Element nodoDirector = doc.createElement("director");
+				nodoDirector.appendChild(doc.createTextNode("\n"));
+				Element nodoNombre = doc.createElement("nombre");
+				Text textNodoNombre = doc.createTextNode(nombre);
+				nodoNombre.appendChild(textNodoNombre);
+				Element nodoApellido = doc.createElement("apellido");
+				Text textNodoApellido = doc.createTextNode(apellido);
+				nodoApellido.appendChild(textNodoApellido);
+				nodoDirector.appendChild(nodoNombre);
+				nodoDirector.appendChild(doc.createTextNode("\n"));
+				nodoDirector.appendChild(nodoApellido);
+				nodoDirector.appendChild(doc.createTextNode("\n"));
 				peliculas.item(i).appendChild(nodoDirector);
 			}
 		}
@@ -153,6 +157,7 @@ public class Ejer1 {
 		return doc;
 	}
 
+	// Corregido
 	public void modificarDom(Document doc, String nodoModificar, String textoAntiguo, String textoNuevo,
 			String apellido) {
 		NodeList nombres = doc.getElementsByTagName(nodoModificar);
@@ -163,7 +168,7 @@ public class Ejer1 {
 //					nombres.item(i).getFirstChild().setNodeValue(textoNuevo);
 //				}
 				if (nombres.item(i).getFirstChild().getNodeValue().equals(textoAntiguo)) {
-					NodeList hermanos=nombres.item(i).getParentNode().getChildNodes();
+					NodeList hermanos = nombres.item(i).getParentNode().getChildNodes();
 					for (int j = 0; j < hermanos.getLength(); j++) {
 						if (hermanos.item(j).getNodeName().equals("apellido")) {
 							if (hermanos.item(j).getFirstChild().getNodeValue().equals(apellido)) {
@@ -180,6 +185,7 @@ public class Ejer1 {
 		}
 	}
 
+	// Corregido
 	public void guardarDom(Document doc, String tituloSalida) throws ClassNotFoundException, InstantiationException,
 			IllegalAccessException, ClassCastException, FileNotFoundException {
 		DOMImplementationRegistry registry = DOMImplementationRegistry.newInstance();
@@ -193,6 +199,7 @@ public class Ejer1 {
 		serializer.write(doc, output);
 	}
 
+	// Corregido
 	public Document añadeDom(Document doc, String titulo, String año, String nombre, String apellido, String genero,
 			String idioma) {
 		try {
@@ -233,6 +240,7 @@ public class Ejer1 {
 		return doc;
 	}
 
+	// Corregido
 	public static void muestraTituloAtributos(Document doc) {
 		NodeList peliculas = doc.getElementsByTagName("pelicula");
 		for (int i = 0; i < peliculas.getLength(); i++) {
@@ -245,41 +253,36 @@ public class Ejer1 {
 		}
 	}
 
-	private void añadeEliminaAtributoaPelicula(Document doc, String titulo, String atributo, boolean añadir) {
-		NodeList peliculas = doc.getElementsByTagName("pelicula");
+	// Corregido
+	private void añadeEliminaAtributoaPelicula(Document doc, String titulo, String atributo, String valor,
+			boolean añadir) {
 		boolean existe = false;
-		for (int i = 0; i < peliculas.getLength(); i++) {
-			NodeList datos = peliculas.item(i).getChildNodes();
-			for (int k = 0; k < datos.getLength(); k++) {
-				if (datos.item(k).getNodeName() == "titulo") {
-					if (datos.item(k).getFirstChild().getNodeValue().equals(titulo)) {
-						if (peliculas.item(i).hasAttributes()) {
-							NamedNodeMap atributos = peliculas.item(i).getAttributes();
-							if (añadir) {
-								for (int j = 0; j < atributos.getLength(); j++) {
-									if (!existe) {
-										if (atributos.item(j).getNodeName().equals(atributo)) {
-											existe = true;
-										}
-									}
-								}
-								if (!existe) {
-									((Element) peliculas.item(i)).setAttribute(atributo, "");
-								}
-							} else {
-								((Element) peliculas.item(i)).removeAttribute(atributo);
-							}
-						} else {
-							if (añadir) {
-								((Element) peliculas.item(i)).setAttribute(atributo, "");
-							}
-						}
-					}
+		NodeList titulos = doc.getElementsByTagName("titulo");
+		for (int i = 0; i < titulos.getLength(); i++) {
+			if (titulos.item(i).getFirstChild().getNodeValue().equals(titulo)) {
+				Element pelicula = (Element) titulos.item(i).getParentNode();
+				if (pelicula.hasAttribute(atributo)) {
+					if (añadir)
+						pelicula.setAttribute(atributo, valor);
+					else
+						pelicula.removeAttribute(atributo);
 				}
+
 			}
 		}
 	}
 
+	// Corregido
+	private void añadeAtributoaPelicula(Document doc, String titulo, String atributo, String valor) {
+		añadeEliminaAtributoaPelicula(doc, titulo, atributo, valor, true);
+	}
+
+	// Corregido
+	private void borraAtributoaPelicula(Document doc, String titulo, String atributo) {
+		añadeEliminaAtributoaPelicula(doc, titulo, atributo, null, false);
+	}
+
+	// Corregido
 	public int cantidadGenerosDistintos(Document doc) {
 		HashMap<String, Integer> generos = new HashMap<>();
 		NodeList peliculas = doc.getElementsByTagName("pelicula");
