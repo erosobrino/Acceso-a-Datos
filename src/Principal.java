@@ -6,6 +6,9 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.net.URL;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
 import javax.json.Json;
@@ -22,34 +25,112 @@ public class Principal {
 	public static void main(String[] args) {
 		Jsonn j = new Jsonn();
 		Principal p = new Principal();
-		String ciudad = "vigo";
-		JsonObject json=null;
-		
-		if (j.abreFuncionTiempo()) {
-			json = (JsonObject) j.leeJSON(p.prediccion.getAbsolutePath());
-		} else {
-//			json=j.prediccionCiudad(ciudad);
-//			System.out.println(json.toString());
-			json = j.prediccionCoordenadas(42.24, -8.72);
-//			System.out.println(json.toString());
-//			json = j.nPrediccionProximasCiudad(42.24, -8.72, 3);
-//			System.out.println(json.toString());
-			try {
-				j.escribeJSON(json);
-			} catch (FileNotFoundException e) {
-			}
-		}
+		JsonObject json = null;
 
-		System.out.println(j.conseguirIDPrediccion(json));
-		System.out.println(j.conseguirNombreCiudad(json));
-		System.out.println(j.conseguirCoordenadas(json));
+//		if (j.abreFuncionTiempo(true)) {// true carga siempre
+//			json = (JsonObject) j.leeJSON(p.prediccion.getAbsolutePath());
+//		} else {
+//			json = j.prediccionCiudad("vigo");
+//			json = j.prediccionCoordenadas(42.24, -8.72);
+//			json = j.nPrediccionProximasCiudad(42.24, -8.72, 3);
+//			try {
+//				j.escribeJSON(json);
+//			} catch (FileNotFoundException e) {
+//			}
+//		}		
+//		System.out.println(json.toString());
+//		j.consigueDatosVariasCiudades(json);
+//		System.out.println(j.conseguirIDPrediccion(json));
+//		System.out.println(j.conseguirNombreCiudad(json));
+//		System.out.println(j.conseguirCoordenadas(json));
+//		System.out.println(j.conseguirFechTempHumNubVelPron(json));
+
+		j.preguntas(20, "hard");
 	}
 }
 
 class Jsonn {
 	public File prediccion = new File("D:\\Ciclo\\Acceso a datos\\EjerJson\\src\\prediccion.json");
 
-	public String conseguirCoordenadas(JsonObject prediccion) {
+	public void preguntas(int cantidad, String dificultad) {// Ejer 13
+		String ruta = "https://opentdb.com/api.php?amount=" + cantidad + "&category=18&difficulty=" + dificultad;
+		JsonObject datos = (JsonObject) leeJSON(ruta);
+		System.out.println(datos.toString());
+		if (datos.containsKey("results")) {
+			JsonArray ArrayListPreguntas = datos.getJsonArray("results");
+			for (int i = 0; i < ArrayListPreguntas.size(); i++) {
+				JsonObject pregunta = (JsonObject) ArrayListPreguntas.get(i);
+				if (pregunta.containsKey("question")) {
+					System.out.println("Pregunta: " + pregunta.getString("question"));
+				}
+				if (pregunta.containsKey("correct_answer")) {
+					System.out.println(pregunta.getString("correct_answer") + "*");
+				}
+				if (pregunta.containsKey("incorrect_answers")) {
+					JsonArray ArrayListIncorrectas = pregunta.getJsonArray("incorrect_answers");
+					for (int j = 0; j < ArrayListIncorrectas.size(); j++) {
+						System.out.println(ArrayListIncorrectas.getString(j));
+					}
+				}
+				System.out.println();
+			}
+		}
+
+	}
+
+	public void consigueDatosVariasCiudades(JsonObject predicciones) {// Ejer 9
+		int cantidad = 0;
+		if (predicciones.containsKey("count")) {
+			cantidad = predicciones.getInt("count");
+		}
+		if (predicciones.containsKey("list")) {
+			JsonArray ArrayListPredicciones = predicciones.getJsonArray("list");
+			for (int i = 0; i < cantidad; i++) {
+				JsonObject prediccion = (JsonObject) ArrayListPredicciones.get(i);
+				System.out.println(conseguirNombreCiudad(prediccion));
+				System.out.println(conseguirFechTempHumNubVelPron(prediccion));
+				System.out.println();
+			}
+		}
+	}
+
+	public String conseguirFechTempHumNubVelPron(JsonObject prediccion) {// Ejer 8
+		String cadena = "";
+		if (prediccion.containsKey("dt")) {
+			cadena += "Fecha: " + unixTimeToString(prediccion.getInt("dt"));
+		}
+		if (prediccion.containsKey("main")) {
+			JsonObject principal = prediccion.getJsonObject("main");
+			if (principal.containsKey("temp")) {
+				cadena += "\nTemperatura: " + principal.get("temp");
+			}
+			if (principal.containsKey("humidity")) {
+				cadena += "\nHumedad: " + principal.getInt("humidity");
+			}
+		}
+		if (prediccion.containsKey("clouds")) {
+			JsonObject nubes = prediccion.getJsonObject("clouds");
+			if (nubes.containsKey("all")) {
+				cadena += "\nProbabilidad Nubes: " + nubes.getInt("all");
+			}
+		}
+		if (prediccion.containsKey("wind")) {
+			JsonObject viento = prediccion.getJsonObject("wind");
+			if (viento.containsKey("speed")) {
+				cadena += "\nVelocidad Viento: " + viento.getInt("speed");
+			}
+		}
+		if (prediccion.containsKey("weather")) {
+			JsonArray tiempo = prediccion.getJsonArray("weather");
+			if (((JsonObject) (tiempo.get(0))).containsKey("main")) {
+				cadena += "\nPronostico: " + ((JsonObject) (tiempo.get(0))).getString("main");
+			}
+		}
+
+		return cadena;
+	}
+
+	public String conseguirCoordenadas(JsonObject prediccion) {// Ejer 7
 		if (prediccion.containsKey("coord")) {
 			JsonObject coordenadas = (JsonObject) prediccion.get("coord");
 			double latitud = Double.parseDouble(coordenadas.get("lat").toString());
@@ -59,72 +140,36 @@ class Jsonn {
 		return "";
 	}
 
-	public String conseguirNombreCiudad(JsonObject prediccion) {
+	public String conseguirNombreCiudad(JsonObject prediccion) {// Ejer 6
 		if (prediccion.containsKey("name")) {
 			return prediccion.getString("name");
 		}
 		return "";
 	}
 
-	public int conseguirIDPrediccion(JsonObject prediccion) {
+	public int conseguirIDPrediccion(JsonObject prediccion) {// Ejer 5
 		if (prediccion.containsKey("id")) {
 			return Integer.parseInt(prediccion.get("id").toString());
 		}
 		return -1;
 	}
 
-	public JsonObject nPrediccionProximasCiudad(double latitud, double longitud, int cantidad) {
-		JsonReader reader = null;
-		JsonObject jsonO = null;
-		try {
-			URL url = new URL("https://api.openweathermap.org/data/2.5/find?lat=" + latitud + "&lon=" + longitud
-					+ "&cnt=" + cantidad + "&APPID=8f8dccaf02657071004202f05c1fdce0");
-			HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
-			InputStream is = conn.getInputStream();
-			reader = Json.createReader(is);
-			jsonO = (JsonObject) reader.read();
-		} catch (IOException e) {
-			System.out.println("Error procesando documento Json" + e.getLocalizedMessage());
-		}
-		if (reader != null)
-			reader.close();
-		return jsonO;
+	public JsonObject nPrediccionProximasCiudad(double latitud, double longitud, int cantidad) {// Ejer 3
+		String ruta = ("https://api.openweathermap.org/data/2.5/find?lat=" + latitud + "&lon=" + longitud + "&cnt="
+				+ cantidad + "&APPID=8f8dccaf02657071004202f05c1fdce0&units=metric");
+		return (JsonObject) leeJSON(ruta);
 	}
 
-	public JsonObject prediccionCoordenadas(double latitud, double longitud) {
-		JsonReader reader = null;
-		JsonObject jsonO = null;
-		try {
-			URL url = new URL("https://api.openweathermap.org/data/2.5/weather?lat=" + latitud + "&lon=" + longitud
-					+ "&APPID=8f8dccaf02657071004202f05c1fdce0");
-			HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
-			InputStream is = conn.getInputStream();
-			reader = Json.createReader(is);
-			jsonO = (JsonObject) reader.read();
-		} catch (IOException e) {
-			System.out.println("Error procesando documento Json" + e.getLocalizedMessage());
-		}
-		if (reader != null)
-			reader.close();
-		return jsonO;
+	public JsonObject prediccionCoordenadas(double latitud, double longitud) {// Ejer 2
+		String ruta = ("https://api.openweathermap.org/data/2.5/weather?lat=" + latitud + "&lon=" + longitud
+				+ "&APPID=8f8dccaf02657071004202f05c1fdce0&units=metric");
+		return (JsonObject) leeJSON(ruta);
 	}
 
-	public JsonObject prediccionCiudad(String ciudad) {
-		JsonReader reader = null;
-		JsonObject jsonO = null;
-		try {
-			URL url = new URL("https://api.openweathermap.org/data/2.5/weather?q=" + ciudad
-					+ "&APPID=8f8dccaf02657071004202f05c1fdce0");
-			HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
-			InputStream is = conn.getInputStream();
-			reader = Json.createReader(is);
-			jsonO = (JsonObject) reader.read();
-		} catch (IOException e) {
-			System.out.println("Error procesando documento Json" + e.getLocalizedMessage());
-		}
-		if (reader != null)
-			reader.close();
-		return jsonO;
+	public JsonObject prediccionCiudad(String ciudad) {// Ejer 1
+		String ruta = ("https://api.openweathermap.org/data/2.5/weather?q=" + ciudad
+				+ "&APPID=8f8dccaf02657071004202f05c1fdce0&units=metric");
+		return (JsonObject) leeJSON(ruta);
 	}
 
 	public JsonValue leeJSON(String ruta) {
@@ -152,9 +197,15 @@ class Jsonn {
 		return jsonV;
 	}
 
-	public boolean abreFuncionTiempo() {
+	public String unixTimeToString(long unixTime) {
+		final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+		return Instant.ofEpochSecond(unixTime).atZone(ZoneId.of("GMT+1")).format(formatter);
+	}
 
-		SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
+	public boolean abreFuncionTiempo(boolean bandera) {
+		if (bandera) {
+			return false;
+		}
 		JsonObject json = (JsonObject) leeJSON(prediccion.getAbsolutePath());
 		Date dt = new Date(prediccion.lastModified());
 //		System.out.println(sdf.format(dt));

@@ -1,0 +1,14 @@
+[
+	{
+		"país":"Nueva Zelanda",
+		"población": 4471000, 
+		"animales":["oveja","kiwi"],
+		"visado":true
+	},
+	{
+		"país":"Australia",
+		"población": 23130000,
+		"animales":["koala","canguro"],
+		"visado":null
+	}
+]
