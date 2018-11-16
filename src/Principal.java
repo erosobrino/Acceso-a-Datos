@@ -4,12 +4,14 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
+import java.io.StringReader;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
+import java.util.Iterator;
 
 import javax.json.Json;
 import javax.json.JsonArray;
@@ -17,6 +19,7 @@ import javax.json.JsonObject;
 import javax.json.JsonReader;
 import javax.json.JsonValue;
 import javax.json.JsonWriter;
+import javax.json.stream.JsonParser;
 import javax.net.ssl.HttpsURLConnection;
 
 public class Principal {
@@ -45,12 +48,103 @@ public class Principal {
 //		System.out.println(j.conseguirCoordenadas(json));
 //		System.out.println(j.conseguirFechTempHumNubVelPron(json));
 
-		j.preguntas(20, "hard");
+//		j.preguntas(20, "hard");
+//		j.eventosPorLocalidadKmCant("vigo", 25, 5);
+		JsonArray eventos = j.eventosPorLocalidadKmCant("vigo", 25, 5);
+//		j.tiempoEnEventos(eventos);
+//		j.informacionDetalladaEventos(eventos);
+//		j.informacionDetalladaUbicacion(eventos);
+		for (JsonValue evento : (JsonArray) eventos) {
+			j.distanciaCiudadAEvento("vigo", (JsonObject) evento);
+		}
 	}
 }
 
 class Jsonn {
 	public File prediccion = new File("D:\\Ciclo\\Acceso a datos\\EjerJson\\src\\prediccion.json");
+
+	public void tiempoEnEventos(JsonArray eventos) {// Ejer 17
+		for (int i = 0; i < eventos.size(); i++) {
+			JsonObject evento = (JsonObject) eventos.get(i);
+			if (evento.containsKey("title") && evento.containsKey("city_name")) {
+				System.out.println(evento.getString("title"));
+				System.out.println(evento.getString("city_name"));
+				JsonObject prediccion = prediccionCiudad(evento.getString("city_name"));
+				System.out.println(conseguirFechTempHumNubVelPron(prediccion) + "\n");
+			}
+		}
+	}
+
+	public String distanciaCiudadAEvento(String ciudad, JsonObject evento) {//Ejer 16
+		String destino;
+		if (evento.containsKey("city_name")) {
+			destino=evento.getString("city_name");
+			String ruta="{\"destination_addresses\":[\"Pontevedra, España\"],\"origin_addresses\":[\"Vigo, Pontevedra, España\"],\"rows\":[{\"elements\":[{\"distance\":{\"text\":\"27,9 km\",\"value\":27871},\"duration\":{\"text\":\"27 min\",\"value\":1625},\"status\":\"OK\"}]}],\"status\":\"OK\"}";
+			JsonObject calculoRuta = Json.createReader(new StringReader(ruta)).readObject();
+			if (calculoRuta.containsKey("rows")) {
+				JsonArray rows=calculoRuta.getJsonArray("rows");
+				JsonObject datos=rows.getJsonObject(0);
+				JsonArray elements=datos.getJsonArray("elements");
+				JsonObject datos2=elements.getJsonObject(0);
+				JsonObject distancia=datos2.getJsonObject("distance");
+				System.out.println(distancia.getString("text"));
+			}
+		}
+		return "";
+	}
+
+	public void informacionDetalladaUbicacion(JsonArray eventos) {// Ejer 15
+		for (int i = 0; i < eventos.size(); i++) {
+			JsonObject evento = eventos.getJsonObject(i);
+			if (evento.containsKey("latitude")) {
+				System.out.println(evento.get("latitude"));
+			}
+			if (evento.containsKey("longitude")) {
+				System.out.println(evento.get("longitude"));
+			}
+			if (evento.containsKey("city_name")) {
+				System.out.println(evento.getString("city_name"));
+			}
+			if (evento.containsKey("country_name")) {
+				System.out.println(evento.getString("country_name"));
+			}
+			System.out.println();
+		}
+	}
+
+	public void informacionDetalladaEventos(JsonArray eventos) {// Ejer 15
+		for (int i = 0; i < eventos.size(); i++) {
+			JsonObject evento = eventos.getJsonObject(i);
+			if (evento.containsKey("title")) {
+				System.out.println(evento.getString("title"));
+			}
+			if (evento.containsKey("description")) {
+				if (evento.get("description").toString() == "null") {
+					System.out.println("Sin descripccion");
+				} else {
+					System.out.println(evento.get("description").toString().substring(2,
+							evento.get("description").toString().length() - 1));
+				}
+			}
+			if (evento.containsKey("url")) {
+				System.out.println(evento.getString("url"));
+			}
+			System.out.println();
+		}
+	}
+
+	public JsonArray eventosPorLocalidadKmCant(String ciudad, int km, int cantidad) {// Ejer 14
+		String ruta = "http://api.eventful.com/json/events/search?l=" + ciudad + "&units=km&within=" + km
+				+ "&page_size=" + cantidad + "&app_key=c2tPtVFTrSk8xnQS";
+		JsonArray eventos = null;
+		JsonObject datos = (JsonObject) leeJSON(ruta);
+		if (datos.containsKey("events")) {
+			if (datos.getJsonObject("events").containsKey("event")) {
+				eventos = datos.getJsonObject("events").getJsonArray("event");
+			}
+		}
+		return eventos;
+	}
 
 	public void preguntas(int cantidad, String dificultad) {// Ejer 13
 		String ruta = "https://opentdb.com/api.php?amount=" + cantidad + "&category=18&difficulty=" + dificultad;
