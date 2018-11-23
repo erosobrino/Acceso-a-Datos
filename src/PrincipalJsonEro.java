@@ -10,6 +10,7 @@ import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 
@@ -22,18 +23,20 @@ import javax.json.JsonWriter;
 import javax.json.stream.JsonParser;
 import javax.net.ssl.HttpsURLConnection;
 
-public class PrincipalJson {
+public class PrincipalJsonEro {
 	public File prediccion = new File("D:\\Ciclo\\Acceso a datos\\EjerJson\\src\\prediccion.json");
-	//Ero Sobrino Dorado
+
+	// Ero Sobrino Dorado
 	public static void main(String[] args) {
 		Jsonn j = new Jsonn();
-		PrincipalJson p = new PrincipalJson();
+		PrincipalJsonEro p = new PrincipalJsonEro();
 		JsonObject json = null;
 
 //		if (j.abreFuncionTiempo(true)) {// true carga siempre
 //			json = (JsonObject) j.leeJSON(p.prediccion.getAbsolutePath());
 //		} else {
 //			json = j.prediccionCiudad("o rosal");
+//			System.out.println(j.conseguirIDPrediccion(json));
 //			System.out.println(j.conseguirNombreCiudad(json));
 //			json = j.prediccionCoordenadas(42.24, -8.72);
 //			json = j.nPrediccionProximasCiudad(42.24, -8.72, 3);
@@ -48,7 +51,7 @@ public class PrincipalJson {
 //		System.out.println(j.conseguirNombreCiudad(json));
 //		System.out.println(j.conseguirCoordenadas(json));
 //		System.out.println(j.conseguirFechTempHumNubVelPron(json));
-
+//
 //		j.preguntas(20, "hard");
 //		j.eventosPorLocalidadKmCant("vigo", 25, 5);
 //		JsonArray eventos = j.eventosPorLocalidadKmCant("vigo", 25, 5);
@@ -58,10 +61,159 @@ public class PrincipalJson {
 //		for (JsonValue evento : (JsonArray) eventos) {
 //			j.distanciaCiudadAEvento("vigo", (JsonObject) evento);
 //		}
-
+//
 //		j.consigueDatosVariasCiudades(j.nPrediccionProximasCiudad(42.232819, -8.72264, 8));
-		JsonArray jsonarr = j.eventosPorLocalidadKmCant("vigo", 100, 10);
-		j.tiempoEnEventos(jsonarr);
+//		JsonArray jsonarr = j.eventosPorLocalidadKmCant("vigo", 100, 10);
+//		j.tiempoEnEventos(jsonarr);
+	}
+}
+
+class Coordenadas {
+	private double latitud;
+	private double longitud;
+
+	double getLatitud() {
+		return latitud;
+	}
+
+	void setLatitud(double latitud) {
+		this.latitud = latitud;
+	}
+
+	double getLongitud() {
+		return longitud;
+	}
+
+	void setLongitud(double longitud) {
+		this.longitud = longitud;
+	}
+
+	public Coordenadas() {
+	}
+
+	@Override
+	public String toString() {
+		return "Latitud: " + this.latitud + " Longitud: " + this.longitud;
+	}
+
+}
+
+class Prediccion {
+	private String fecha;
+	private double temperatura;
+	private int humedad;
+	private int nubes;
+	private int viento;
+	private String pronostico;
+
+	public String getFecha() {
+		return fecha;
+	}
+
+	public void setFecha(String fecha) {
+		this.fecha = fecha;
+	}
+
+	public int getViento() {
+		return viento;
+	}
+
+	public void setViento(int viento) {
+		this.viento = viento;
+	}
+
+	public String getPronostico() {
+		return pronostico;
+	}
+
+	public void setPronostico(String pronostico) {
+		this.pronostico = pronostico;
+	}
+
+	public double getTemperatura() {
+		return temperatura;
+	}
+
+	public void setTemperatura(double temperatura) {
+		this.temperatura = temperatura;
+	}
+
+	public int getHumedad() {
+		return humedad;
+	}
+
+	public void setHumedad(int humedad) {
+		this.humedad = humedad;
+	}
+
+	public int getNubes() {
+		return nubes;
+	}
+
+	public void setNubes(int nubes) {
+		this.nubes = nubes;
+	}
+
+	public Prediccion() {
+	}
+}
+
+class DatosCiudad {
+	private String nombreCiudad;
+	private Prediccion prediccion;
+
+	public String getNombreCiudad() {
+		return nombreCiudad;
+	}
+
+	public void setNombreCiudad(String nombreCiudad) {
+		this.nombreCiudad = nombreCiudad;
+	}
+
+	public Prediccion getPrediccion() {
+		return prediccion;
+	}
+
+	public void setPrediccion(Prediccion prediccion) {
+		this.prediccion = prediccion;
+	}
+
+	public DatosCiudad() {
+
+	}
+}
+
+class Pregunta {
+	private String pregunta;
+	private String correcta;
+	private ArrayList<String> incorrectas;
+
+	public String getPregunta() {
+		return pregunta;
+	}
+
+	public void setPregunta(String pregunta) {
+		this.pregunta = pregunta;
+	}
+
+	public String getCorrecta() {
+		return correcta;
+	}
+
+	public void setCorrecta(String correcta) {
+		this.correcta = correcta;
+	}
+
+	public ArrayList<String> getIncorrectas() {
+		return incorrectas;
+	}
+
+	public void setIncorrectas(ArrayList<String> incorrectas) {
+		this.incorrectas = incorrectas;
+	}
+
+	public Pregunta() {
+
 	}
 }
 
@@ -70,7 +222,7 @@ class Jsonn {
 
 	public void tiempoEnEventos(JsonArray eventos) {// Ejer 17
 		for (int i = 0; i < eventos.size(); i++) {
-			JsonObject evento = (JsonObject) eventos.get(i);
+			JsonObject evento = eventos.getJsonObject(i);
 			if (evento.containsKey("title") && evento.containsKey("city_name")) {
 				System.out.println(evento.getString("title"));
 				System.out.println(evento.getString("city_name"));
@@ -102,10 +254,10 @@ class Jsonn {
 		for (int i = 0; i < eventos.size(); i++) {
 			JsonObject evento = eventos.getJsonObject(i);
 			if (evento.containsKey("latitude")) {
-				System.out.println(evento.get("latitude"));
+				System.out.println(evento.getString("latitude"));
 			}
 			if (evento.containsKey("longitude")) {
-				System.out.println(evento.get("longitude"));
+				System.out.println(evento.getString("longitude"));
 			}
 			if (evento.containsKey("city_name")) {
 				System.out.println(evento.getString("city_name"));
@@ -124,11 +276,10 @@ class Jsonn {
 				System.out.println(evento.getString("title"));
 			}
 			if (evento.containsKey("description")) {
-				if (evento.get("description").toString() == "null") {
+				if (evento.getString("description") == "null") {
 					System.out.println("Sin descripccion");
 				} else {
-					System.out.println(evento.get("description").toString().substring(2,
-							evento.get("description").toString().length() - 1));
+					System.out.println(evento.getString("description"));
 				}
 			}
 			if (evento.containsKey("url")) {
@@ -151,33 +302,38 @@ class Jsonn {
 		return eventos;
 	}
 
-	public void preguntas(int cantidad, String dificultad) {// Ejer 13
+	public ArrayList<Pregunta> preguntas(int cantidad, String dificultad) {// Ejer 13
+		ArrayList<Pregunta> preguntasArrayList=new ArrayList<>();
 		String ruta = "https://opentdb.com/api.php?amount=" + cantidad + "&category=18&difficulty=" + dificultad;
 		JsonObject datos = (JsonObject) leeJSON(ruta);
 		System.out.println(datos.toString());
 		if (datos.containsKey("results")) {
 			JsonArray ArrayListPreguntas = datos.getJsonArray("results");
 			for (int i = 0; i < ArrayListPreguntas.size(); i++) {
-				JsonObject pregunta = (JsonObject) ArrayListPreguntas.get(i);
+				Pregunta preg=new Pregunta();
+				JsonObject pregunta = ArrayListPreguntas.getJsonObject(i);
 				if (pregunta.containsKey("question")) {
-					System.out.println("Pregunta: " + pregunta.getString("question"));
+					preg.setPregunta(pregunta.getString("question")));
 				}
 				if (pregunta.containsKey("correct_answer")) {
-					System.out.println(pregunta.getString("correct_answer") + "*");
+					preg.setCorrecta(pregunta.getString("correct_answer") + "*");
 				}
 				if (pregunta.containsKey("incorrect_answers")) {
+					ArrayList<String> incorrectas=new ArrayList<>();
 					JsonArray ArrayListIncorrectas = pregunta.getJsonArray("incorrect_answers");
 					for (int j = 0; j < ArrayListIncorrectas.size(); j++) {
-						System.out.println(ArrayListIncorrectas.getString(j));
+						incorrectas.add(ArrayListIncorrectas.getString(j));
 					}
+					preg.setIncorrectas(incorrectas);
 				}
-				System.out.println();
+				preguntasArrayList.add(preg);
 			}
 		}
-
+		return preguntasArrayList;
 	}
 
-	public void consigueDatosVariasCiudades(JsonObject predicciones) {// Ejer 9
+	public ArrayList<DatosCiudad> consigueDatosVariasCiudades(JsonObject predicciones) {// Ejer 9
+		ArrayList<DatosCiudad> datosCiudades = new ArrayList<>();
 		int cantidad = 0;
 		if (predicciones.containsKey("count")) {
 			cantidad = predicciones.getInt("count");
@@ -185,59 +341,63 @@ class Jsonn {
 		if (predicciones.containsKey("list")) {
 			JsonArray ArrayListPredicciones = predicciones.getJsonArray("list");
 			for (int i = 0; i < cantidad; i++) {
-				JsonObject prediccion = (JsonObject) ArrayListPredicciones.get(i);
-				System.out.println(conseguirNombreCiudad(prediccion));
-				System.out.println(conseguirFechTempHumNubVelPron(prediccion));
-				System.out.println();
+				JsonObject prediccion = ArrayListPredicciones.getJsonObject(i);
+				DatosCiudad datosCiudad = new DatosCiudad();
+				datosCiudad.setNombreCiudad(conseguirNombreCiudad(prediccion));
+				datosCiudad.setPrediccion(conseguirFechTempHumNubVelPron(prediccion));
+				datosCiudades.add(datosCiudad);
 			}
 		}
+		return datosCiudades;
 	}
 
-	public String conseguirFechTempHumNubVelPron(JsonObject prediccion) {// Ejer 8
-		String cadena = "";
+	public Prediccion conseguirFechTempHumNubVelPron(JsonObject prediccion) {// Ejer 8
+		Prediccion predic = new Prediccion();
 		if (prediccion != null) {
 			if (prediccion.containsKey("dt")) {
-				cadena += "Fecha: " + unixTimeToString(prediccion.getInt("dt"));
+				predic.setFecha(unixTimeToString(prediccion.getInt("dt")));
 			}
 			if (prediccion.containsKey("main")) {
 				JsonObject principal = prediccion.getJsonObject("main");
 				if (principal.containsKey("temp")) {
-					cadena += "\nTemperatura: " + principal.get("temp");
+					predic.setTemperatura(principal.getJsonNumber("temp").doubleValue());
 				}
 				if (principal.containsKey("humidity")) {
-					cadena += "\nHumedad: " + principal.getInt("humidity");
+					predic.setHumedad(principal.getInt("humidity"));
 				}
 			}
 			if (prediccion.containsKey("clouds")) {
 				JsonObject nubes = prediccion.getJsonObject("clouds");
 				if (nubes.containsKey("all")) {
-					cadena += "\nProbabilidad Nubes: " + nubes.getInt("all");
+					predic.setNubes(nubes.getInt("all"));
 				}
 			}
 			if (prediccion.containsKey("wind")) {
 				JsonObject viento = prediccion.getJsonObject("wind");
 				if (viento.containsKey("speed")) {
-					cadena += "\nVelocidad Viento: " + viento.getInt("speed");
+					predic.setViento(viento.getInt("speed"));
 				}
 			}
 			if (prediccion.containsKey("weather")) {
 				JsonArray tiempo = prediccion.getJsonArray("weather");
-				if (((JsonObject) (tiempo.get(0))).containsKey("main")) {
-					cadena += "\nPronostico: " + ((JsonObject) (tiempo.get(0))).getString("main");
+				if ((tiempo.getJsonObject(0)).containsKey("main")) {
+					predic.setPronostico((tiempo.getJsonObject(0)).getString("main"));
 				}
 			}
 		}
-		return cadena;
+		return predic;
 	}
 
-	public String conseguirCoordenadas(JsonObject prediccion) {// Ejer 7
+	public Coordenadas conseguirCoordenadas(JsonObject prediccion) {// Ejer 7
+		Coordenadas coordenadas = new Coordenadas();
 		if (prediccion.containsKey("coord")) {
-			JsonObject coordenadas = (JsonObject) prediccion.get("coord");
-			double latitud = Double.parseDouble(coordenadas.get("lat").toString());
-			double longitud = Double.parseDouble(coordenadas.get("lon").toString());
-			return latitud + " " + longitud;
+			JsonObject coordenadasJson = prediccion.getJsonObject("coord");
+			double latitud = coordenadasJson.getJsonNumber("lat").doubleValue();
+			double longitud = coordenadasJson.getJsonNumber("lon").doubleValue();
+			coordenadas.setLatitud(latitud);
+			coordenadas.setLongitud(longitud);
 		}
-		return "";
+		return coordenadas;
 	}
 
 	public String conseguirNombreCiudad(JsonObject prediccion) {// Ejer 6
@@ -249,7 +409,7 @@ class Jsonn {
 
 	public int conseguirIDPrediccion(JsonObject prediccion) {// Ejer 5
 		if (prediccion.containsKey("id")) {
-			return Integer.parseInt(prediccion.get("id").toString());
+			return prediccion.getInt("id");
 		}
 		return -1;
 	}
