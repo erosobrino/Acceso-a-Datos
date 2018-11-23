@@ -35,10 +35,10 @@ public class PrincipalJsonEro {
 //		if (j.abreFuncionTiempo(true)) {// true carga siempre
 //			json = (JsonObject) j.leeJSON(p.prediccion.getAbsolutePath());
 //		} else {
-			json = j.prediccionCiudad("o rosal");
-			System.out.println(j.conseguirIDPrediccion(json));
-			System.out.println(j.conseguirNombreCiudad(json));
-			json = j.prediccionCoordenadas(42.24, -8.72);
+//			json = j.prediccionCiudad("o rosal");
+//			System.out.println(j.conseguirIDPrediccion(json));
+//			System.out.println(j.conseguirNombreCiudad(json));
+//			json = j.prediccionCoordenadas(42.24, -8.72);
 //			json = j.nPrediccionProximasCiudad(42.24, -8.72, 3);
 //			try {
 //				j.escribeJSON(json);
