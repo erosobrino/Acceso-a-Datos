@@ -22,18 +22,19 @@ import javax.json.JsonWriter;
 import javax.json.stream.JsonParser;
 import javax.net.ssl.HttpsURLConnection;
 
-public class Principal {
+public class PrincipalJson {
 	public File prediccion = new File("D:\\Ciclo\\Acceso a datos\\EjerJson\\src\\prediccion.json");
-
+	//Ero Sobrino Dorado
 	public static void main(String[] args) {
 		Jsonn j = new Jsonn();
-		Principal p = new Principal();
+		PrincipalJson p = new PrincipalJson();
 		JsonObject json = null;
 
 //		if (j.abreFuncionTiempo(true)) {// true carga siempre
 //			json = (JsonObject) j.leeJSON(p.prediccion.getAbsolutePath());
 //		} else {
-//			json = j.prediccionCiudad("vigo");
+//			json = j.prediccionCiudad("o rosal");
+//			System.out.println(j.conseguirNombreCiudad(json));
 //			json = j.prediccionCoordenadas(42.24, -8.72);
 //			json = j.nPrediccionProximasCiudad(42.24, -8.72, 3);
 //			try {
@@ -50,13 +51,17 @@ public class Principal {
 
 //		j.preguntas(20, "hard");
 //		j.eventosPorLocalidadKmCant("vigo", 25, 5);
-		JsonArray eventos = j.eventosPorLocalidadKmCant("vigo", 25, 5);
+//		JsonArray eventos = j.eventosPorLocalidadKmCant("vigo", 25, 5);
 //		j.tiempoEnEventos(eventos);
 //		j.informacionDetalladaEventos(eventos);
 //		j.informacionDetalladaUbicacion(eventos);
-		for (JsonValue evento : (JsonArray) eventos) {
-			j.distanciaCiudadAEvento("vigo", (JsonObject) evento);
-		}
+//		for (JsonValue evento : (JsonArray) eventos) {
+//			j.distanciaCiudadAEvento("vigo", (JsonObject) evento);
+//		}
+
+//		j.consigueDatosVariasCiudades(j.nPrediccionProximasCiudad(42.232819, -8.72264, 8));
+		JsonArray jsonarr = j.eventosPorLocalidadKmCant("vigo", 100, 10);
+		j.tiempoEnEventos(jsonarr);
 	}
 }
 
@@ -75,18 +80,18 @@ class Jsonn {
 		}
 	}
 
-	public String distanciaCiudadAEvento(String ciudad, JsonObject evento) {//Ejer 16
+	public String distanciaCiudadAEvento(String ciudad, JsonObject evento) {// Ejer 16
 		String destino;
 		if (evento.containsKey("city_name")) {
-			destino=evento.getString("city_name");
-			String ruta="{\"destination_addresses\":[\"Pontevedra, España\"],\"origin_addresses\":[\"Vigo, Pontevedra, España\"],\"rows\":[{\"elements\":[{\"distance\":{\"text\":\"27,9 km\",\"value\":27871},\"duration\":{\"text\":\"27 min\",\"value\":1625},\"status\":\"OK\"}]}],\"status\":\"OK\"}";
+			destino = evento.getString("city_name");
+			String ruta = "{\"destination_addresses\":[\"Pontevedra, España\"],\"origin_addresses\":[\"Vigo, Pontevedra, España\"],\"rows\":[{\"elements\":[{\"distance\":{\"text\":\"27,9 km\",\"value\":27871},\"duration\":{\"text\":\"27 min\",\"value\":1625},\"status\":\"OK\"}]}],\"status\":\"OK\"}";
 			JsonObject calculoRuta = Json.createReader(new StringReader(ruta)).readObject();
 			if (calculoRuta.containsKey("rows")) {
-				JsonArray rows=calculoRuta.getJsonArray("rows");
-				JsonObject datos=rows.getJsonObject(0);
-				JsonArray elements=datos.getJsonArray("elements");
-				JsonObject datos2=elements.getJsonObject(0);
-				JsonObject distancia=datos2.getJsonObject("distance");
+				JsonArray rows = calculoRuta.getJsonArray("rows");
+				JsonObject datos = rows.getJsonObject(0);
+				JsonArray elements = datos.getJsonArray("elements");
+				JsonObject datos2 = elements.getJsonObject(0);
+				JsonObject distancia = datos2.getJsonObject("distance");
 				System.out.println(distancia.getString("text"));
 			}
 		}
@@ -190,37 +195,38 @@ class Jsonn {
 
 	public String conseguirFechTempHumNubVelPron(JsonObject prediccion) {// Ejer 8
 		String cadena = "";
-		if (prediccion.containsKey("dt")) {
-			cadena += "Fecha: " + unixTimeToString(prediccion.getInt("dt"));
-		}
-		if (prediccion.containsKey("main")) {
-			JsonObject principal = prediccion.getJsonObject("main");
-			if (principal.containsKey("temp")) {
-				cadena += "\nTemperatura: " + principal.get("temp");
+		if (prediccion != null) {
+			if (prediccion.containsKey("dt")) {
+				cadena += "Fecha: " + unixTimeToString(prediccion.getInt("dt"));
 			}
-			if (principal.containsKey("humidity")) {
-				cadena += "\nHumedad: " + principal.getInt("humidity");
+			if (prediccion.containsKey("main")) {
+				JsonObject principal = prediccion.getJsonObject("main");
+				if (principal.containsKey("temp")) {
+					cadena += "\nTemperatura: " + principal.get("temp");
+				}
+				if (principal.containsKey("humidity")) {
+					cadena += "\nHumedad: " + principal.getInt("humidity");
+				}
+			}
+			if (prediccion.containsKey("clouds")) {
+				JsonObject nubes = prediccion.getJsonObject("clouds");
+				if (nubes.containsKey("all")) {
+					cadena += "\nProbabilidad Nubes: " + nubes.getInt("all");
+				}
+			}
+			if (prediccion.containsKey("wind")) {
+				JsonObject viento = prediccion.getJsonObject("wind");
+				if (viento.containsKey("speed")) {
+					cadena += "\nVelocidad Viento: " + viento.getInt("speed");
+				}
+			}
+			if (prediccion.containsKey("weather")) {
+				JsonArray tiempo = prediccion.getJsonArray("weather");
+				if (((JsonObject) (tiempo.get(0))).containsKey("main")) {
+					cadena += "\nPronostico: " + ((JsonObject) (tiempo.get(0))).getString("main");
+				}
 			}
 		}
-		if (prediccion.containsKey("clouds")) {
-			JsonObject nubes = prediccion.getJsonObject("clouds");
-			if (nubes.containsKey("all")) {
-				cadena += "\nProbabilidad Nubes: " + nubes.getInt("all");
-			}
-		}
-		if (prediccion.containsKey("wind")) {
-			JsonObject viento = prediccion.getJsonObject("wind");
-			if (viento.containsKey("speed")) {
-				cadena += "\nVelocidad Viento: " + viento.getInt("speed");
-			}
-		}
-		if (prediccion.containsKey("weather")) {
-			JsonArray tiempo = prediccion.getJsonArray("weather");
-			if (((JsonObject) (tiempo.get(0))).containsKey("main")) {
-				cadena += "\nPronostico: " + ((JsonObject) (tiempo.get(0))).getString("main");
-			}
-		}
-
 		return cadena;
 	}
 
@@ -284,7 +290,8 @@ class Jsonn {
 			}
 			jsonV = reader.read();
 		} catch (IOException e) {
-			System.out.println("Error procesando documento Json" + e.getLocalizedMessage());
+//			System.out.println("Error procesando documento Json" + e.getLocalizedMessage());
+			System.out.println("No se ha encontrado informacion");
 		}
 		if (reader != null)
 			reader.close();
