@@ -1,10 +1,13 @@
 package Ejer1;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectOutputStream;
+import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
@@ -13,9 +16,24 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Enumeration;
 
+import javax.print.Doc;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
 import org.mariadb.jdbc.Driver;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Text;
+import org.w3c.dom.bootstrap.DOMImplementationRegistry;
+import org.w3c.dom.ls.DOMImplementationLS;
+import org.w3c.dom.ls.LSOutput;
+import org.w3c.dom.ls.LSSerializer;
+
+import com.healthmarketscience.jackcess.impl.IndexCodes;
 
 public class Principal1 {
 
@@ -57,9 +75,26 @@ public class Principal1 {
 //			database1.trasnsaccionInsercion(new String[] { "INSERT INTO aulas VALUES (5, 'Física', 23)",
 //					"INSERT INTO aula VALUES (6, 'Química', 34)" });
 //			database1.cerrarConexion();
-			database1.abrirConexion("add", "localhost", "root", "");
-			database1.leeObjetosBinarios();
-			database1.cerrarConexion();
+//			database1.abrirConexion("add", "localhost", "root", "");
+//			database1.leeObjetosBinarios("D:\\Ciclo\\Acceso a datos");
+//			database1.escribeObjetosBinarios("D:\\Descargas\\imagen.png");
+//			database1.cerrarConexion();
+//			database1.abrirConexionUCANACCESS("D:/Ciclo/Acceso a datos/2 Ev/Alumnos.mdb");
+//			database1.abrirConexion("add", "localhost", "root", "");
+//			database1.ejecutaGetAulasSuma(10,"o");
+//			database1.cerrarConexion();
+//			database1.abrirConexion("add", "localhost", "root", "");
+//			database1.buscaCadenaEnBD("add", "Lar");
+//			database1.cerrarConexion();
+//			database1.creaXML("D:\\Ciclo\\Acceso a datos\\tabla.xml", "add", "alumnos");
+
+//			database1.abrirSQLite("D:\\Ciclo\\Acceso a datos", "sql.db");
+////			database1.aulasConNPuestos(30, true);
+////			database1.insertarAula(3, "wfsdg", 3);
+//			database1.insertaAulaReemplaza(1, "1111sdtggerth1rettrrrrtt", 2);
+//			database1.buscaPorNombreEnMySQLySQLite("add","D:\\Ciclo\\Acceso a datos","sql.db","F");
+//			database1.cerrarConexion();
+			database1.insercionEnAmbasConRollBack("add","D:\\Ciclo\\Acceso a datos","sql.db",1,"sdfsdf", 6);
 		} catch (Exception e) {
 			System.out.println("Se ha producido un error: " + e.getLocalizedMessage());
 		}
@@ -70,25 +105,286 @@ class JDBC {
 	private Connection conexion;
 	private PreparedStatement ps = null;
 
-	// Ejer13
-	
-	public void escribeObjetosBinarios() throws IOException,SQLException{
-		
+	// Ejer9
+	public void insercionEnAmbasConRollBack(String bd, String rutaSQlite, String nombreBDSQLite, int numero,
+			String nombre, int puestos) throws ClassNotFoundException {
+		String query = "INSERT into aulas values(" + numero + ",'" + nombre + "'," + puestos + ");";
+		boolean insertaEnMYSQL = false;
+		abrirConexion(bd, "localhost", "root", null);
+		Statement stmt;
+		try {
+			stmt = this.conexion.createStatement();
+			stmt.executeUpdate(query);
+			cerrarConexion();
+			insertaEnMYSQL = true;
+			abrirSQLite(rutaSQlite, nombreBDSQLite);
+			stmt = this.conexion.createStatement();
+			stmt.executeQuery(query);
+		} catch (SQLException e) {
+			if (insertaEnMYSQL) {
+				try {
+					abrirConexion(bd, "localhost", "root", null);
+					stmt = this.conexion.createStatement();
+					stmt.executeUpdate("DELETE from aulas where numero=" + numero + ";");
+				} catch (SQLException e1) {
+				}
+			}
+		}
+		cerrarConexion();
 	}
-	public void leeObjetosBinarios() throws IOException, SQLException {
+
+	// Ejer8
+	public void buscaPorNombreEnMySQLySQLite(String bd, String rutaSQlite, String nombreBDSQLite, String cadena)
+			throws SQLException, ClassNotFoundException {
+		abrirConexion(bd, "localhost", "root", null);
+		String query = "select * from aulas where nombreAula like \"%" + cadena + "%\";";
+		Statement stmt = this.conexion.createStatement();
+		ResultSet rs = stmt.executeQuery(query);
+		while (rs.next()) {
+			System.out.println(rs.getInt("numero") + " " + rs.getString("nombreAula") + " " + rs.getInt("puestos"));
+		}
+		System.out.println();
+		abrirSQLite(rutaSQlite, nombreBDSQLite);
+		rs = stmt.executeQuery(query);
+		while (rs.next()) {
+			System.out.println(rs.getInt("numero") + " " + rs.getString("nombreAula") + " " + rs.getInt("puestos"));
+		}
+		cerrarConexion();
+	}
+
+	// Ejer6
+	public void insertaAulaReemplaza(int numero, String nombre, int puestos) throws SQLException {
+		boolean encontrado = false;
+		ArrayList<Integer> indices = new ArrayList<>();
+		String nombreAntiguo = "";
+		String puestosAntiguo = "";
+		String query = "SELECT * from aulas;";
+		Statement stmt = this.conexion.createStatement();
+		ResultSet rs = stmt.executeQuery(query); // Se ejecuta la consulta
+		while (rs.next()) {
+			indices.add(rs.getInt("numero"));
+			if (!encontrado) {
+				if (rs.getInt("numero") == numero) {
+					encontrado = true;
+					nombreAntiguo = rs.getString("nombreAula");
+					puestosAntiguo = rs.getString("puestos");
+				}
+			}
+		}
+		if (encontrado) {
+			String query3 = "DELETE FROM AULAS WHERE NUMERO = " + numero + ";";
+			stmt.executeUpdate(query3);
+			boolean cambiado = false;
+			int i = 0;
+			while (!cambiado) {
+				if (!indices.contains(i)) {
+					String query2 = "INSERT into aulas values(" + i + ",'" + nombreAntiguo + "'," + puestosAntiguo
+							+ ");";
+					stmt.executeUpdate(query2);
+					cambiado = true;
+				} else {
+					i++;
+				}
+			}
+		}
+
+		String query2 = "INSERT into aulas values(" + numero + ",'" + nombre + "'," + puestos + ");";
+		stmt.executeUpdate(query2);
+
+		stmt.close();
+	}
+
+	// Ejer5
+	public void insertarAula(int numero, String nombre, int puestos) throws SQLException {
+		String query = "INSERT into aulas values(" + numero + ",'" + nombre + "'," + puestos + ");";
+		Statement stmt = this.conexion.createStatement();
+		stmt.executeUpdate(query);
+		stmt.close();
+	}
+
+	// Ejer4
+	public void aulasConNPuestos(int cantidad, boolean preparada) throws SQLException {
+		if (preparada) {
+			String query = "SELECT * from aulas WHERE PUESTOS>?;";
+			if (this.ps == null)
+				this.ps = this.conexion.prepareStatement(query);
+			ps.setInt(1, cantidad);
+			ResultSet rs = ps.executeQuery();
+			while (rs.next()) {
+				System.out
+						.println(rs.getInt("numero") + "\t" + rs.getString("nombreAula") + "\t" + rs.getInt("puestos"));
+			}
+		} else {
+			String query = "SELECT * from aulas WHERE PUESTOS>" + cantidad + ";";
+			Statement stmt = this.conexion.createStatement();
+			ResultSet rs = stmt.executeQuery(query); // Se ejecuta la consulta
+			while (rs.next()) {
+				System.out
+						.println(rs.getInt("numero") + "\t" + rs.getString("nombreAula") + "\t" + rs.getInt("puestos"));
+			}
+			stmt.close(); //
+		}
+	}
+
+	public void abrirSQLite(String rutaBaseDeDatos, String baseDeDatos) throws ClassNotFoundException {
+		try {
+			Class.forName("org.sqlite.JDBC");
+			this.conexion = DriverManager.getConnection("jdbc:sqlite:/" + rutaBaseDeDatos + "/" + baseDeDatos);
+			if (this.conexion != null) {
+//				System.out.println("Conectado a la base de datos " + bd + " en " + servidor);
+			} else
+				System.out.println("NO se ha conectado a la base de datos");
+		} catch (SQLException e) {
+			System.out.println("SQLException: " + e.getLocalizedMessage());
+			System.out.println("SQLState: " + e.getSQLState());
+			System.out.println("Código error: " + e.getErrorCode());
+		}
+	}
+
+	// Ejer3
+	// SELECT * from aulas ORDER BY PUESTOS DESC LIMIT 3;
+
+	// Ejer17
+	public void creaXML(String ruta, String bd, String nombreTabla) throws FileNotFoundException,
+			ClassNotFoundException, InstantiationException, IllegalAccessException, ClassCastException, SQLException {
+		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();// 12 Crea archivo con compañia
+		DocumentBuilder builder = null;
+		try {
+			builder = factory.newDocumentBuilder();
+		} catch (ParserConfigurationException e) {
+		}
+		Document tabla = builder.newDocument();
+		Element datos = tabla.createElement(nombreTabla);
+		datos.appendChild(tabla.createTextNode("\n"));
+		tabla.appendChild(datos);
+		abrirConexion(bd, "localhost", "root", "");
+		Statement stmt = conexion.createStatement();
+		ResultSet rs = stmt.executeQuery("select * from " + nombreTabla);
+		int cont = 1;
+		while (rs.next()) {
+			ResultSetMetaData rsmd = rs.getMetaData();
+			Element elemento = tabla.createElement("Elemento" + cont);
+			datos.appendChild(elemento);
+			cont++;
+			for (int i = 1; i <= rsmd.getColumnCount(); i++) {
+				Element hijo = tabla.createElement(rsmd.getColumnName(i));
+				Text texto = tabla.createTextNode(rs.getString(i));
+				hijo.appendChild(texto);
+				hijo.appendChild(tabla.createTextNode("\n"));
+				elemento.appendChild(hijo);
+			}
+			System.out.println();
+		}
+
+		cerrarConexion();
+		DOMImplementationRegistry registry = DOMImplementationRegistry.newInstance();
+		DOMImplementationLS ls = (DOMImplementationLS) registry.getDOMImplementation("XML 3.0 LS 3.0");
+		LSOutput output = ls.createLSOutput();
+		output.setEncoding("UTF-8");
+		output.setByteStream(new FileOutputStream(ruta));
+		LSSerializer serializer = ls.createLSSerializer();
+		serializer.setNewLine("\r\n");
+		serializer.getDomConfig().setParameter("format-pretty-print", true);
+		serializer.write(tabla, output);
+	}
+
+	// Ejer16
+	public void buscaCadenaEnBD(String bd, String cadena) throws SQLException {
+		DatabaseMetaData dbmt;
+		ResultSet tablas;
+		dbmt = this.conexion.getMetaData();
+		tablas = dbmt.getTables(bd, null, null, null);
+		System.out.println("Cadena: " + cadena + "\n");
+		while (tablas.next()) {
+			if (tablas.getString("TABLE_TYPE").equals("TABLE")) {
+				String nombreTabla = tablas.getString("TABLE_NAME");
+				String query = "select * from " + nombreTabla;
+				Statement stmt = conexion.createStatement();
+				ResultSet rs = stmt.executeQuery(query);
+				while (rs.next()) {
+					ResultSetMetaData rsmd = rs.getMetaData();
+					for (int i = 1; i <= rsmd.getColumnCount(); i++) {
+						if (rsmd.getColumnTypeName(i).equals("CHAR") || rsmd.getColumnTypeName(i).equals("VARCHAR")) {
+							if (rs.getString(i) != null) {
+								if (rs.getString(i).toUpperCase().contains(cadena.toUpperCase())) {
+									System.out.println("BD: " + bd);
+									System.out.println("Tabla: " + nombreTabla);
+									System.out.println("Columna: " + rsmd.getColumnName(i));
+									System.out.println(rs.getString(i) + "\n");
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	// Ejer15
+	public void ejecutaGetAulasSuma(int cantidadPuestos, String cadena) throws SQLException {
+		CallableStatement cs = this.conexion.prepareCall("CALL getAulas(?,?)");
+		cs.setInt(1, cantidadPuestos);
+		cs.setString(2, cadena);
+		ResultSet resultado = cs.executeQuery();
+		while (resultado.next()) {
+			System.out.println(resultado.getInt(1) + "\t" + resultado.getString("nombreAula") + "\t"
+					+ resultado.getInt("puestos"));
+		}
+		Statement stmt = this.conexion.createStatement();
+		stmt.executeQuery("SELECT suma() INTO @res;");
+		ResultSet rs = stmt.executeQuery("SELECT @res;");
+		while (rs.next()) {
+			System.out.println(rs.getInt("@res"));
+		}
+	}
+
+	// Ejer14
+	public void abrirConexionUCANACCESS(String rutaBD) {
+		try {
+			Class.forName("net.ucanaccess.jdbc.UcanaccessDriver");
+			this.conexion = DriverManager.getConnection("jdbc:ucanaccess://" + rutaBD + ";memory=false");
+			Statement stmt = this.conexion.createStatement();
+			ResultSet rs = stmt.executeQuery("select * from Alumnos");
+			while (rs.next()) {
+				System.out.print(rs.getString("Codigo") + " ");
+				System.out.println(rs.getString("Nombre"));
+			}
+			stmt.close();
+		} catch (SQLException e) {
+			System.out.println("SQLException: " + e.getLocalizedMessage());
+			System.out.println("SQLState: " + e.getSQLState());
+			System.out.println("Código error: " + e.getErrorCode());
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		cerrarConexion();
+	}
+
+	// Ejer13
+	public void escribeObjetosBinarios(String ruta) throws IOException, SQLException {
+		String query = "insert into imagenes values (?,?);";
+		File f = new File(ruta);
+		if (this.ps == null)
+			this.ps = this.conexion.prepareStatement(query);
+		ps.setString(1, f.getName());
+		ps.setBinaryStream(2, new FileInputStream(f));
+		ps.executeQuery();
+	}
+
+	public void leeObjetosBinarios(String ruta) throws IOException, SQLException {
 		String query = "select * from imagenes";
-		int i=0;
+		int i = 0;
 		Statement stmt = this.conexion.createStatement();
 		ResultSet rs = stmt.executeQuery(query);
 		while (rs.next()) {
 			System.out.println(rs.getString("nombre"));
-			try (FileOutputStream fos = new FileOutputStream("D:\\Ciclo\\Acceso a datos\\"+rs.getString("nombre"));
-					) {
-				InputStream is=rs.getBinaryStream("imagen");
-				while ((i=is.read())!=-1) {
+			try (FileOutputStream fos = new FileOutputStream(ruta + "\\" + rs.getString("nombre"));) {
+				InputStream is = rs.getBinaryStream("imagen");
+				while ((i = is.read()) != -1) {
 					fos.write(i);
 				}
-				
+
 				is.close();
 			}
 		}
@@ -120,8 +416,13 @@ class JDBC {
 		}
 	}
 
-	// Ejer11 falta
+	// Ejer11
 	public void listaDrivers() throws SQLException {
+		Enumeration<java.sql.Driver> drivers = DriverManager.getDrivers();
+		while (drivers.hasMoreElements()) {
+			Driver driver = (Driver) drivers.nextElement();
+			System.out.println(driver.getClass().getName());
+		}
 	}
 
 	// Ejer10
