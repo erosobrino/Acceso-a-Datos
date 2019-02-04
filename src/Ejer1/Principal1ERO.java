@@ -31,7 +31,7 @@ import org.w3c.dom.ls.DOMImplementationLS;
 import org.w3c.dom.ls.LSOutput;
 import org.w3c.dom.ls.LSSerializer;
 //ERO SOBRINO DORADO
-public class Principal1 {
+public class Principal1ERO {
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
