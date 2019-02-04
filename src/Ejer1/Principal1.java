@@ -6,7 +6,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.ObjectOutputStream;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -19,7 +18,6 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Enumeration;
 
-import javax.print.Doc;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -32,8 +30,6 @@ import org.w3c.dom.bootstrap.DOMImplementationRegistry;
 import org.w3c.dom.ls.DOMImplementationLS;
 import org.w3c.dom.ls.LSOutput;
 import org.w3c.dom.ls.LSSerializer;
-
-import com.healthmarketscience.jackcess.impl.IndexCodes;
 
 public class Principal1 {
 
@@ -94,7 +90,13 @@ public class Principal1 {
 //			database1.insertaAulaReemplaza(1, "1111sdtggerth1rettrrrrtt", 2);
 //			database1.buscaPorNombreEnMySQLySQLite("add","D:\\Ciclo\\Acceso a datos","sql.db","F");
 //			database1.cerrarConexion();
-			database1.insercionEnAmbasConRollBack("add","D:\\Ciclo\\Acceso a datos","sql.db",1,"sdfsdf", 6);
+//			database1.insercionEnAmbasConRollBack("add", "D:\\Ciclo\\Acceso a datos", "sql.db", 1, "sdfsdf", 6);
+//			database1.introduceDatosFechas("add", "D:\\Ciclo\\Acceso a datos", "sql.db", "ddddddddaaaaaaaaaaaaaaaaaaaaaaaae",
+//					"1968-10-23 12:45:37.123");
+//			database1.introduceDatosFechas("add", "D:\\Ciclo\\Acceso a datos", "sql.db", "dddddddde",
+//					"19681023124537123");
+			database1.introduceDatosFechas("add", "D:\\Ciclo\\Acceso a datos", "sql.db", "dddddddde", "");
+
 		} catch (Exception e) {
 			System.out.println("Se ha producido un error: " + e.getLocalizedMessage());
 		}
@@ -104,6 +106,47 @@ public class Principal1 {
 class JDBC {
 	private Connection conexion;
 	private PreparedStatement ps = null;
+
+	// b) Con los parametros añade la cadena recortada a los 1o caracteres maximos,
+	// con la normale no se añade y en sqlite se añade entera
+	// c)Con los parametros se añade bien la fecha, en sqlite se añade la cadena
+	// como esta y de forma normal da error en el formato de la fecha
+	// d) Con sqlite tiene una hora distinta. Con datetime(current_timestamp, +1hour )
+	// e) Con los parametros añade una hora con todo 0, en sqlite lo deja en blanco
+	// y con la normal da error en el valor
+	// Ejer10
+	public void introduceDatosFechas(String bd, String rutaSQlite, String nombreBDSQLite, String nombre, String fecha)
+			throws ClassNotFoundException, SQLException {
+		String query = "INSERT into fechas values('" + nombre + "','" + fecha + "');";
+		String query2 = "INSERT INTO fechas VALUES('" + nombre + "',CURRENT_TIMESTAMP);";
+		Statement stmt;
+		abrirConexion(bd, "localhost", "root", null);
+		stmt = this.conexion.createStatement();
+//		stmt.executeUpdate(query);
+		stmt.executeUpdate(query2);
+		cerrarConexion();
+
+		try {
+			String url = String.format(
+					"jdbc:mariadb://%s:3306/%s?jdbcCompliantTruncation=false&zeroDateTimeBehavior=convertToNull",
+					"localhost", bd);
+			this.conexion = DriverManager.getConnection(url, "root", ""); // Establecemos la conexión con la BD
+			stmt = this.conexion.createStatement();
+//			stmt.executeUpdate(query);
+			stmt.executeUpdate(query2);
+			cerrarConexion();
+		} catch (SQLException e) {
+			System.out.println("SQLException: " + e.getLocalizedMessage());
+			System.out.println("SQLState: " + e.getSQLState());
+			System.out.println("Código error: " + e.getErrorCode());
+		}
+
+		abrirSQLite(rutaSQlite, nombreBDSQLite);
+		stmt = this.conexion.createStatement();
+//		stmt.executeUpdate(query);
+		stmt.executeUpdate(query2);
+		cerrarConexion();
+	}
 
 	// Ejer9
 	public void insercionEnAmbasConRollBack(String bd, String rutaSQlite, String nombreBDSQLite, int numero,
@@ -128,6 +171,7 @@ class JDBC {
 					stmt.executeUpdate("DELETE from aulas where numero=" + numero + ";");
 				} catch (SQLException e1) {
 				}
+				System.out.println("Se hace rollback");
 			}
 		}
 		cerrarConexion();
