@@ -1,6 +1,7 @@
 package ejercicios;
 
 import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 
@@ -19,6 +20,7 @@ public class Persona {
 //		this.sexo = sexo;
 //	}
 
+	@XmlElement(name="sexoGalego")
 	public String getSexo() {
 		return sexo;
 	}
@@ -28,6 +30,7 @@ public class Persona {
 	}
 
 //	@XmlAttribute
+	@XmlElement(name="idGalego")
 	public int getId() {
 		return id;
 	}
@@ -36,6 +39,7 @@ public class Persona {
 		this.id = id;
 	}
 
+	@XmlElement(name="nombreGalego")
 	public String getNombre() {
 		return nombre;
 	}
@@ -44,6 +48,7 @@ public class Persona {
 		this.nombre = nombre;
 	}
 
+	@XmlElement(name="casadoGalego")
 	public boolean isCasado() {
 		return casado;
 	}

@@ -14,6 +14,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 import com.sun.media.jfxmedia.Media;
 
@@ -23,6 +24,13 @@ public class GestionaPersona {
 	Persona perso;
 
 	static ArrayList<Persona> personas = new ArrayList<>();
+
+	@GET
+	@Path("galego")
+	@Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+	public ArrayList<Persona> galego() {
+		return personas;
+	}
 
 	// Ejer 10 Descomentar xmlattribute en persona y al añadir en xml se pone
 	// <persona id="num">
@@ -59,10 +67,14 @@ public class GestionaPersona {
 	@Path("add")
 	@Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
 	public Response guardaVariasPersonas(ArrayList<Persona> personas) {
-		for (Persona persona : personas) {
-			this.personas.add(persona);
+		try {
+			for (Persona persona : personas) {
+				this.personas.add(persona);
+			}
+			return Response.ok(personas).build();
+		} catch (Exception e) {
+			return Response.status(Status.BAD_REQUEST).entity("Array nulo").type(MediaType.TEXT_PLAIN).build();
 		}
-		return Response.ok(personas).build();
 	}
 
 	// Ejer 5 6
@@ -72,13 +84,19 @@ public class GestionaPersona {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response formPersona(@FormParam("nombre") String nombre, @FormParam("sexo") String sexo,
 			@FormParam("casado") boolean casado, @FormParam("id") int id) {
-		perso = new Persona();
-		perso.setNombre(nombre);
-		perso.setSexo(sexo);
-		perso.setCasado(casado);
-		perso.setId(id);
-		personas.add(perso);
-		return Response.ok(perso).build();
+
+		try {
+			perso = new Persona();
+			perso.setNombre(nombre);
+			perso.setSexo(sexo);
+			perso.setCasado(casado);
+			perso.setId(id);
+			personas.add(perso);
+			return Response.ok(perso).build();
+		} catch (Exception e) {
+			return Response.status(Status.BAD_REQUEST).entity("Error al añadir a la persona").type(MediaType.TEXT_PLAIN)
+					.build();
+		}
 	}
 
 	// Ejer3 4 9
@@ -110,8 +128,13 @@ public class GestionaPersona {
 	@Path("guardar")
 	@Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
 	public Response guardar(Persona perso) {
-		personas.add(perso);
-		return Response.ok(perso).build();
+		try {
+			personas.add(perso);
+			return Response.ok(perso).build();
+		} catch (Exception e) {
+			return Response.status(Status.BAD_REQUEST).entity("Error al añadir a la persona").type(MediaType.TEXT_PLAIN)
+					.build();
+		}
 	}
 
 	@GET
