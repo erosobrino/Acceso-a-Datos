@@ -117,7 +117,7 @@ public class GestionaPersona {
 
 	// Ejer2
 	@GET
-	@Path("listar")
+	@Path("/listar")
 	@Produces({ MediaType.APPLICATION_XML })
 	public ArrayList<Persona> listar() {
 		return this.personas;
