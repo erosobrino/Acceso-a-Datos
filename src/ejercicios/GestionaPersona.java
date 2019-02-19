@@ -16,8 +16,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import com.sun.media.jfxmedia.Media;
-
 @Path("/personas")
 public class GestionaPersona {
 

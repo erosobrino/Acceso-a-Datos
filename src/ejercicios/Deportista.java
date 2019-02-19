@@ -1,5 +1,8 @@
 package ejercicios;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
+@XmlRootElement
 public class Deportista {
 	int id;
 	String nombre;
