@@ -1,5 +1,6 @@
 package ejercicios;
 
+import java.io.FileInputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -21,6 +22,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import com.sun.media.jfxmedia.Media;
+
 import jdk.management.resource.internal.inst.SocketOutputStreamRMHooks;
 
 @Path("/deportistas")
@@ -33,6 +36,97 @@ public class GestionaDeportistas {
 	String servidor = "localhost";
 	String usuario = "root";
 	String password = "";
+//	String rutaImagenes = "D:\\Ciclo\\Acceso a datos\\imagenes\\";
+	String rutaImagenes = "../imagenes\\";
+
+//	// 20
+//	@GET
+//	@Path("/{id}")
+//	@Produces({ MediaType.TEXT_HTML})
+//	public String getIDHTML(@PathParam("id") int id) {
+//		String query = "SELECT * from deportistas where id=" + id;
+//		abrirConexion(bd, servidor, usuario, password);
+//		try {
+//			Statement stmt = conexion.createStatement();
+//			ResultSet rs = stmt.executeQuery(query);
+//			Deportista deportista = new Deportista();
+//			while (rs.next()) {
+//				deportista.setId(rs.getInt("id"));
+//				deportista.setNombre(rs.getString("nombre"));
+//				deportista.setActivo(rs.getBoolean("activo"));
+//				deportista.setGenero(rs.getString("genero"));
+//				deportista.setDeporte(rs.getString("deporte"));
+//			}
+//		} catch (SQLException e) {
+//			return null;
+//		}
+//		cerrarConexion();
+//		return "";
+//	}
+
+	// 19
+	@GET
+	@Path("/img/{id}")
+	@Produces(MediaType.TEXT_HTML)
+	public Response muestraTodasImagenID(@PathParam("id") int id, @PathParam("num") int num) {
+//	public String muestraTodasImagenID(@PathParam("id") int id, @PathParam("num") int num) {
+		ArrayList<String> rutas = new ArrayList<>();
+		abrirConexion(bd, servidor, usuario, password);
+		try {
+			Statement stmt = conexion.createStatement();
+			String query = "SELECT * from deportistas where id=" + id;
+			Deportista deportista = new Deportista();
+			ResultSet rs = stmt.executeQuery(query);
+			while (rs.next()) {
+				deportista.setId(rs.getInt("id"));
+				deportista.setNombre(rs.getString("nombre"));
+				deportista.setActivo(rs.getBoolean("activo"));
+				deportista.setGenero(rs.getString("genero"));
+				deportista.setDeporte(rs.getString("deporte"));
+			}
+			query = "SELECT * FROM imagenes WHERE id=" + id + ";";
+			rs = stmt.executeQuery(query);
+			while (rs.next()) {
+				rutas.add(rutaImagenes + rs.getString("nombre"));
+			}
+			cerrarConexion();
+			String str = "<html><body><form><h2>Datos del deportista</h2><label>Nombre:" + deportista.nombre
+					+ "</label><br><br><label>Deporte:" + deportista.deporte + "</label><br><br><label>Genero:"
+					+ deportista.genero + "</label><br><br><label>Activo: " + deportista.activo
+					+ "</label><br><br><label>ID: " + deportista.id + "</label><br><br>";
+			for (String ruta : rutas) {
+				str += "<img src='" + ruta + "' width=\"100\" height=\"100\" alt=\"aaaa\">";
+			}
+			str += "</form></body></html>";
+//			return str;
+			return Response.ok(str).build();
+		} catch (Exception e) {
+			return Response.ok("Error").build();
+//			return "";
+		}
+	}
+
+	// 18
+	@GET
+	@Path("/img/{id}/{num}")
+	@Produces("image/jpg")
+	public Response muestraImagenID(@PathParam("id") int id, @PathParam("num") int num) {
+		String ruta = "No existe";
+		abrirConexion(bd, servidor, usuario, password);
+		try {
+			String query = "SELECT * FROM imagenes WHERE id=" + id + " and nombre like '" + id + "_" + num + "%';";
+			Statement stmt = conexion.createStatement();
+			ResultSet rs = stmt.executeQuery(query);
+			while (rs.next()) {
+				return Response.ok(new FileInputStream(rutaImagenes + rs.getString("nombre"))).build();
+			}
+		} catch (Exception e) {
+			cerrarConexion();
+			return Response.ok("Error").build();
+		}
+		cerrarConexion();
+		return Response.ok("No existe").build();
+	}
 
 	// 17
 	@DELETE
